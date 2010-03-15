@@ -46,7 +46,7 @@ class CoffeeMachineTest < Test::Unit::TestCase
   end
   
   def test_classpath_option
-    should_run_command %{java -cp "/path/to/foo:bar" Foo}
+    should_run_command %{java -classpath "/path/to/foo:bar" Foo}
     CoffeeMachine::JavaRunner.run('Foo', :classpath => '/path/to/foo:bar')
   end
   
