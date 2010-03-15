@@ -1,5 +1,12 @@
 require File.dirname(__FILE__) + '/../lib/coffee_machine'
 
+begin
+  gem 'test-unit'
+rescue Gem::LoadError
+  puts "Run `gem install test-unit` if encountering the following exception:"
+  puts "uninitialized constant Test::Unit::TestResult::TestResultFailureSupport (NameError)".inspect
+end if RUBY_PLATFORM =~ /(win|w)32/
+
 require 'test/unit'
 require 'mocha'
 require 'stringio'
@@ -57,9 +64,12 @@ class CoffeeMachineTest < Test::Unit::TestCase
   end
   
   def test_stderr_return_value
-    stdout_content, stderr_content = CoffeeMachine::JavaRunner.run("Foo", :java => "/wrong/java")
-    assert_equal "", stdout_content
-    assert_match /(No such file)|(cannot find the path)/, stderr_content
+    stdout_content, stderr_content = CoffeeMachine::JavaRunner.run('',
+      :java => 'ruby',
+      :java_args =>  %{-e "STDERR.print('STDERR content')"}
+    )
+    assert_equal '', stdout_content
+    assert_equal 'STDERR content', stderr_content
   end
   
   protected
