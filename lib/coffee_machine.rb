@@ -52,7 +52,7 @@ module CoffeeMachine
         command = []
         command << java
         command << options[:java_args] if options[:java_args]
-        command << "-cp #{classpath.inspect}" if classpath
+        command << "-classpath #{classpath.inspect}" if classpath
         command << class_or_jar
         command << options[:args] if options[:args]
         command << "2>" << stderr.path.inspect
