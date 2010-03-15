@@ -28,19 +28,19 @@ module CoffeeMachine
     end
     
     def run
-      create_stderr_tempfile do
-        IO.popen(command, IO::RDWR) do |stream|
+      create_stderr do
+        IO.popen(command, IO::RDWR) do |pipe|
           if block_given?
-            return yield(stream, stderr)
+            return yield(pipe, stderr)
           else
-            return stream.read, stderr.read
+            return pipe.read, stderr.read
           end
         end
       end
     end
     
     protected
-      def create_stderr_tempfile
+      def create_stderr
         tempfile = Tempfile.open(TEMPFILE_BASENAME)
         tempfile.close
         File.open(tempfile.path) do |stderr|
@@ -56,7 +56,7 @@ module CoffeeMachine
         command << "-classpath #{classpath.inspect}" if classpath
         command << class_or_jar
         command << options[:args] if options[:args]
-        command << "2>" << stderr.path.inspect
+        command << redirect_stderr
         command.join(' ')
       end
       
@@ -70,6 +70,10 @@ module CoffeeMachine
           classpath = classpath.join(':') if classpath.respond_to?(:join)
           @classpath = classpath
         end
+      end
+      
+      def redirect_stderr
+        "2> #{stderr.path.inspect}"
       end
   end
 end
