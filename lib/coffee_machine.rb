@@ -2,10 +2,10 @@ module CoffeeMachine
   extend self
   
   def run_java(class_or_jar, options = {}, &block)
-    case class_or_jar
-    when /\.class$/
+    case File.extname(class_or_jar)
+    when '.class'
       class_or_jar = class_or_jar.inspect
-    when /\.jar$/
+    when '.jar'
       class_or_jar = "-jar #{class_or_jar.inspect}"
     end
     JavaRunner.run(class_or_jar, options, &block)
