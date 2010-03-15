@@ -14,20 +14,20 @@ require 'stringio'
 class CoffeeMachineTest < Test::Unit::TestCase
   def test_run_class
     CoffeeMachine::JavaRunner.expects(:run).with('Foo', {})
-    CoffeeMachine.run_class('Foo')
+    CoffeeMachine.run_java('Foo')
     
     CoffeeMachine::JavaRunner.expects(:run).with('"path/to/Foo.class"', {})
-    CoffeeMachine.run_class('path/to/Foo.class')
+    CoffeeMachine.run_java('path/to/Foo.class')
   end
   
   def test_run_jar
     CoffeeMachine::JavaRunner.expects(:run).with('-jar "path/to/foo.jar"', {})
-    CoffeeMachine.run_jar('path/to/foo.jar')
+    CoffeeMachine.run_java('path/to/foo.jar')
   end
   
   def test_run_methods_forward_options
     CoffeeMachine::JavaRunner.expects(:run).with(anything, :foo => :bar)
-    CoffeeMachine.run_class('Foo', :foo => :bar)
+    CoffeeMachine.run_java('Foo', :foo => :bar)
   end
   
   def test_java_option

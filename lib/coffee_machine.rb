@@ -1,13 +1,14 @@
 module CoffeeMachine
   extend self
   
-  def run_class(java_class, options = {}, &block)
-    java_class = java_class.inspect if java_class =~ /\.class$/
-    JavaRunner.run(java_class, options, &block)
-  end
-  
-  def run_jar(path_to_jar, options = {}, &block)
-    JavaRunner.run("-jar #{path_to_jar.inspect}", options, &block)
+  def run_java(class_or_jar, options = {}, &block)
+    case class_or_jar
+    when /\.class$/
+      class_or_jar = class_or_jar.inspect
+    when /\.jar$/
+      class_or_jar = "-jar #{class_or_jar.inspect}"
+    end
+    JavaRunner.run(class_or_jar, options, &block)
   end
   
   class JavaRunner # :nodoc:
