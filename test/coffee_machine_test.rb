@@ -52,8 +52,8 @@ class CoffeeMachineTest < Test::Unit::TestCase
   
   def test_block_given
     should_run_command(/^java Foo 2> "(.*)"$/).yields(:a_stream)
-    return_value = CoffeeMachine::JavaRunner.run('Foo') do |stream, stderr|
-      assert_equal(:a_stream, stream)
+    return_value = CoffeeMachine::JavaRunner.run('Foo') do |pipe, stderr|
+      assert_equal(:a_stream, pipe)
       assert_respond_to stderr, :read
       assert_equal stderr.path, @match.captures.first
       :value_returned_by_block

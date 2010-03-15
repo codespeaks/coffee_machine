@@ -14,7 +14,13 @@ module CoffeeMachine
     autoload :Tempfile, 'tempfile'
     
     TEMPFILE_BASENAME = 'ruby-java'.freeze
-    DEFAULT_JAVA = 'java'.freeze
+    
+    DEFAULT_OPTIONS = {
+      :java       => 'java'.freeze,
+      :args       => nil,
+      :java_args  => nil,
+      :class_path => nil
+    }.freeze
     
     attr_reader :class_or_jar, :options, :stderr
     
@@ -24,7 +30,7 @@ module CoffeeMachine
     
     def initialize(class_or_jar, options = {})
       @class_or_jar = class_or_jar
-      @options = options
+      @options = DEFAULT_OPTIONS.merge(options)
     end
     
     def run
@@ -51,17 +57,13 @@ module CoffeeMachine
       
       def command
         command = []
-        command << java
-        command << options[:java_args] if options[:java_args]
+        command << options[:java]
+        command << options[:java_args]
         command << "-classpath #{classpath.inspect}" if classpath
         command << class_or_jar
-        command << options[:args] if options[:args]
+        command << options[:args]
         command << redirect_stderr
-        command.join(' ')
-      end
-      
-      def java
-        options[:java] || DEFAULT_JAVA
+        command.compact.join(' ')
       end
       
       def classpath
