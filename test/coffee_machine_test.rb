@@ -54,7 +54,7 @@ class CoffeeMachineTest < Test::Unit::TestCase
     should_run_command(/^java Foo 2> "(.*)"$/).yields(:a_stream)
     return_value = CoffeeMachine::JavaRunner.run('Foo') do |stream, stderr|
       assert_equal(:a_stream, stream)
-      assert_instance_of Tempfile, stderr
+      assert_respond_to stderr, :read
       assert_equal stderr.path, @match.captures.first
       :value_returned_by_block
     end

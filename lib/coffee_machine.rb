@@ -33,7 +33,7 @@ module CoffeeMachine
           if block_given?
             return yield(stream, stderr)
           else
-            return stream.read, File.read(stderr.path)
+            return stream.read, stderr.read
           end
         end
       end
@@ -41,9 +41,10 @@ module CoffeeMachine
     
     protected
       def create_stderr_tempfile
-        Tempfile.open(TEMPFILE_BASENAME) do |tempfile|
-          @stderr = tempfile
-          tempfile.close
+        tempfile = Tempfile.open(TEMPFILE_BASENAME)
+        tempfile.close
+        File.open(tempfile.path) do |stderr|
+          @stderr = stderr
           yield
         end
       end
