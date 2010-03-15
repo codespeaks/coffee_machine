@@ -25,6 +25,11 @@ class CoffeeMachineTest < Test::Unit::TestCase
     CoffeeMachine.run_jar('path/to/foo.jar')
   end
   
+  def test_run_methods_forward_options
+    CoffeeMachine::JavaRunner.expects(:run).with(anything, :foo => :bar)
+    CoffeeMachine.run_class('Foo', :foo => :bar)
+  end
+  
   def test_java_option
     should_run_command %{/path/to/java Foo}
     CoffeeMachine::JavaRunner.run('Foo', :java => '/path/to/java')
@@ -57,10 +62,10 @@ class CoffeeMachineTest < Test::Unit::TestCase
   end
   
   def test_stdout_return_value
-    should_run_command(%{java Foo}).yields(StringIO.new("mocked STDOUT"))
+    should_run_command(%{java Foo}).yields(StringIO.new('STDOUT content'))
     stdout_content, stderr_content = CoffeeMachine::JavaRunner.run('Foo')
-    assert_equal "mocked STDOUT", stdout_content
-    assert_equal "", stderr_content
+    assert_equal 'STDOUT content', stdout_content
+    assert_equal '', stderr_content
   end
   
   def test_stderr_return_value
