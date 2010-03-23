@@ -76,8 +76,10 @@ module CoffeeMachine
       
       def classpath
         if (classpath = options[:classpath]) && !classpath.empty?
-          classpath = classpath.join(':') if classpath.respond_to?(:join)
-          "-classpath #{classpath.inspect}"
+          if classpath.is_a?(Enumerable) && !classpath.is_a?(String)
+            classpath = classpath.collect { |dir| dir.inspect }.join(':')
+          end
+          "-classpath #{classpath}"
         end
       end
       
