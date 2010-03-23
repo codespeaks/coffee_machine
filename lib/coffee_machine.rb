@@ -1,13 +1,13 @@
 module CoffeeMachine
   extend self
   
-  def run_class(java_class, options = {}, &block)
+  def run_class(java_class, *args, &block)
     java_class = java_class.inspect if java_class =~ /\.class$/
-    JavaRunner.run(java_class, options, &block)
+    JavaRunner.run(java_class, *args, &block)
   end
   
-  def run_jar(path_to_jar, options = {}, &block)
-    JavaRunner.run("-jar #{path_to_jar.inspect}", options, &block)
+  def run_jar(path_to_jar, *args, &block)
+    JavaRunner.run("-jar #{path_to_jar.inspect}", *args, &block)
   end
   
   class JavaRunner # :nodoc:
@@ -17,7 +17,6 @@ module CoffeeMachine
     
     DEFAULT_OPTIONS = {
       :java       => 'java'.freeze,
-      :args       => nil,
       :java_args  => nil,
       :class_path => nil
     }.freeze
@@ -28,9 +27,10 @@ module CoffeeMachine
       new(*args).run(&block)
     end
     
-    def initialize(class_or_jar, options = {})
+    def initialize(class_or_jar, program_args = nil, options = {})
       @class_or_jar = class_or_jar
-      @options = DEFAULT_OPTIONS.merge(options)
+      options, program_args = program_args, nil if options?(program_args)
+      @program_args, @options = program_args, DEFAULT_OPTIONS.merge(options)
     end
     
     def run
@@ -46,6 +46,10 @@ module CoffeeMachine
     end
     
     protected
+      def options?(arg)
+        arg.is_a?(Hash) && arg.keys.any? { |k| k.is_a?(Symbol) }
+      end
+      
       def create_stderr
         tempfile = Tempfile.open(TEMPFILE_BASENAME)
         tempfile.close
@@ -79,7 +83,7 @@ module CoffeeMachine
       end
       
       def program_args
-        format_args(options[:args])
+        format_args(@program_args)
       end
       
       def format_args(args)

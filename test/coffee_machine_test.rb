@@ -14,49 +14,51 @@ require 'set'
 
 class CoffeeMachineTest < Test::Unit::TestCase
   def test_run_class
-    CoffeeMachine::JavaRunner.expects(:run).with('Foo', {})
+    CoffeeMachine::JavaRunner.expects(:run).with('Foo')
     CoffeeMachine.run_class('Foo')
     
-    CoffeeMachine::JavaRunner.expects(:run).with('"path/to/Foo.class"', {})
+    CoffeeMachine::JavaRunner.expects(:run).with('"path/to/Foo.class"')
     CoffeeMachine.run_class('path/to/Foo.class')
   end
   
   def test_run_jar
-    CoffeeMachine::JavaRunner.expects(:run).with('-jar "path/to/foo.jar"', {})
+    CoffeeMachine::JavaRunner.expects(:run).with('-jar "path/to/foo.jar"')
     CoffeeMachine.run_jar('path/to/foo.jar')
   end
   
-  def test_run_methods_forward_options
-    CoffeeMachine::JavaRunner.expects(:run).with(anything, :foo => :bar)
-    CoffeeMachine.run_class('Foo', :foo => :bar)
+  def test_run_methods_forward_args
+    CoffeeMachine::JavaRunner.expects(:run).with('Foo', '--foo -bar')
+    CoffeeMachine.run_class('Foo', '--foo -bar')
+    CoffeeMachine::JavaRunner.expects(:run).with('Foo', '--foo -bar', :foo => :bar)
+    CoffeeMachine.run_class('Foo', '--foo -bar', :foo => :bar)
   end
   
-  def test_java_option
-    should_run_command %{/path/to/java Foo}
-    CoffeeMachine::JavaRunner.run('Foo', :java => '/path/to/java')
-  end
-  
-  def test_args_option_as_string
+  def test_program_args_as_string
     should_run_command %{java Foo -bar --baz}
-    CoffeeMachine::JavaRunner.run('Foo', :args => '-bar --baz')
+    CoffeeMachine::JavaRunner.run('Foo', '-bar --baz')
   end
   
-  def test_args_option_as_hash
+  def test_program_args_as_hash
     should_run_command do |command|
       if command =~ /^java Foo (.*) 2>/
         $1.scan(/--?\w+(?: \w+)?/).to_set == Set.new(['-bar', '--baz', '--foo 42'])
       end
     end
-    CoffeeMachine::JavaRunner.run('Foo', :args => {
+    CoffeeMachine::JavaRunner.run('Foo', {
       '-bar'  => true,
       '--baz' => true,
       '--foo' => 42
     })
   end
   
-  def test_args_option_as_array
+  def test_program_args_as_array
     should_run_command %{java Foo -bar --baz --foo 42}
-    CoffeeMachine::JavaRunner.run('Foo', :args => ['-bar', '--baz', '--foo 42'])
+    CoffeeMachine::JavaRunner.run('Foo', ['-bar', '--baz', '--foo 42'])
+  end
+  
+  def test_java_option
+    should_run_command %{/path/to/java Foo}
+    CoffeeMachine::JavaRunner.run('Foo', :java => '/path/to/java')
   end
   
   def test_java_args_options_as_string
