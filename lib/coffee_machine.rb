@@ -58,12 +58,16 @@ module CoffeeMachine
       def command
         command = []
         command << options[:java]
-        command << options[:java_args]
+        command << java_args
         command << "-classpath #{classpath.inspect}" if classpath
         command << class_or_jar
-        command << options[:args]
+        command << program_args
         command << redirect_stderr
         command.compact.join(' ')
+      end
+      
+      def java_args
+        format_args(options[:java_args])
       end
       
       def classpath
@@ -71,6 +75,19 @@ module CoffeeMachine
         if (classpath = options[:classpath]) && !classpath.empty?
           classpath = classpath.join(':') if classpath.respond_to?(:join)
           @classpath = classpath
+        end
+      end
+      
+      def program_args
+        format_args(options[:args])
+      end
+      
+      def format_args(args)
+        case args
+        when Hash
+          args = (args.to_a.flatten - [true]).join(' ')
+        when Enumerable
+          args = args.to_a.join(' ')
         end
       end
       

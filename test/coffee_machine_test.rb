@@ -10,6 +10,7 @@ end if RUBY_PLATFORM =~ /(win|w)32/
 require 'test/unit'
 require 'mocha'
 require 'stringio'
+require 'set'
 
 class CoffeeMachineTest < Test::Unit::TestCase
   def test_run_class
@@ -35,14 +36,45 @@ class CoffeeMachineTest < Test::Unit::TestCase
     CoffeeMachine::JavaRunner.run('Foo', :java => '/path/to/java')
   end
   
-  def test_args_option
+  def test_args_option_as_string
     should_run_command %{java Foo -bar --baz}
     CoffeeMachine::JavaRunner.run('Foo', :args => '-bar --baz')
   end
   
-  def test_java_args_options
+  def test_args_option_as_hash
+    should_run_command do |command|
+      if command =~ /^java Foo (.*) 2>/
+        $1.scan(/--?\w+(?: \w+)?/).to_set == Set.new(['-bar', '--baz', '--foo 42'])
+      end
+    end
+    CoffeeMachine::JavaRunner.run('Foo', :args => {
+      '-bar'  => true,
+      '--baz' => true,
+      '--foo' => 42
+    })
+  end
+  
+  def test_args_option_as_array
+    should_run_command %{java Foo -bar --baz --foo 42}
+    CoffeeMachine::JavaRunner.run('Foo', :args => ['-bar', '--baz', '--foo 42'])
+  end
+  
+  def test_java_args_options_as_string
     should_run_command %{java -bar --baz Foo}
     CoffeeMachine::JavaRunner.run('Foo', :java_args => '-bar --baz')
+  end
+  
+  def test_java_args_options_as_hash
+    should_run_command do |command|
+      if command =~ /^java (.*) Foo/
+        $1.scan(/--?\w+(?: \w+)?/).to_set == Set.new(['-bar', '--baz', '--foo 42'])
+      end
+    end
+    CoffeeMachine::JavaRunner.run('Foo', :java_args => {
+      '-bar'  => true,
+      '--baz' => true,
+      '--foo' => 42
+    })
   end
   
   def test_classpath_option
@@ -78,10 +110,14 @@ class CoffeeMachineTest < Test::Unit::TestCase
   end
   
   protected
-    def should_run_command(pattern)
-      pattern = Regexp.compile("^#{pattern}") unless pattern.is_a?(Regexp)
+    def should_run_command(pattern = nil)
+      pattern = Regexp.compile("^#{pattern}") unless pattern.nil? || pattern.is_a?(Regexp)
       IO.expects(:popen).with do |command, mode|
-        mode == IO::RDWR && @match = pattern.match(command)
+        if block_given?
+          yield(command)
+        else
+          @match = pattern.match(command)
+        end
       end
     end
 end
