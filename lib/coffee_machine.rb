@@ -13,7 +13,7 @@ module CoffeeMachine
   class JavaRunner # :nodoc:
     autoload :Tempfile, 'tempfile'
     
-    TEMPFILE_BASENAME = 'ruby-java'.freeze
+    TEMPFILE_BASENAME = 'coffee_machine'.freeze
     
     DEFAULT_OPTIONS = {
       :java       => 'java'.freeze,
