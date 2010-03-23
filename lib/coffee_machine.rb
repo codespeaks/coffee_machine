@@ -63,7 +63,7 @@ module CoffeeMachine
         command = []
         command << options[:java]
         command << java_args
-        command << "-classpath #{classpath.inspect}" if classpath
+        command << classpath
         command << class_or_jar
         command << program_args
         command << redirect_stderr
@@ -75,10 +75,9 @@ module CoffeeMachine
       end
       
       def classpath
-        return @classpath if defined?(@classpath)
         if (classpath = options[:classpath]) && !classpath.empty?
           classpath = classpath.join(':') if classpath.respond_to?(:join)
-          @classpath = classpath
+          "-classpath #{classpath.inspect}"
         end
       end
       
