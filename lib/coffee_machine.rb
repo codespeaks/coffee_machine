@@ -34,7 +34,8 @@ module CoffeeMachine
     end
     
     def run
-      create_stderr do
+      create_stderr do |stderr|
+        @stderr = stderr
         IO.popen(command, IO::RDWR) do |pipe|
           if block_given?
             return yield(pipe, stderr)
@@ -50,13 +51,10 @@ module CoffeeMachine
         arg.is_a?(Hash) && arg.keys.any? { |k| k.is_a?(Symbol) }
       end
       
-      def create_stderr
+      def create_stderr(&block)
         tempfile = Tempfile.open(TEMPFILE_BASENAME)
         tempfile.close
-        File.open(tempfile.path) do |stderr|
-          @stderr = stderr
-          yield
-        end
+        File.open(tempfile.path, &block)
       end
       
       def command
