@@ -60,14 +60,14 @@ module CoffeeMachine
       end
       
       def command
-        command = []
-        command << options[:java]
-        command << java_args
-        command << classpath
-        command << class_or_jar
-        command << program_args
-        command << redirect_stderr
-        command.compact.join(' ')
+        cmd = []
+        cmd << options[:java]
+        cmd << java_args
+        cmd << classpath
+        cmd << class_or_jar
+        cmd << program_args
+        cmd << redirect_stderr
+        cmd.compact.join(' ')
       end
       
       def java_args
@@ -88,9 +88,15 @@ module CoffeeMachine
       def format_args(args)
         case args
         when Hash
-          args = (args.to_a.flatten - [true]).join(' ')
+          args.inject([]) do |array, (key, value)|
+            array << key
+            array << value unless value == true
+            array
+          end.join(' ')
+        when String
+          args
         when Enumerable
-          args = args.to_a.join(' ')
+          args.to_a.join(' ')
         end
       end
       
