@@ -16,9 +16,9 @@ module CoffeeMachine
     TEMPFILE_BASENAME = 'coffee_machine'.freeze
     
     DEFAULT_OPTIONS = {
-      :java       => 'java'.freeze,
-      :java_args  => nil,
-      :class_path => nil
+      :java      => 'java'.freeze,
+      :java_args => nil,
+      :classpath => nil
     }.freeze
     
     attr_reader :class_or_jar, :options, :stderr
